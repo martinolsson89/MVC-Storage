@@ -14,9 +14,26 @@ public class ProductsController : Controller
 {
     private readonly StorageContext _context;
 
+
     public ProductsController(StorageContext context)
     {
         _context = context;
+    }
+
+    // GET: Products/Inventory
+    public async Task<IActionResult> Inventory()
+    {
+        IEnumerable<ProductViewModel> productViewModels = await _context.Product
+            .Select(p => new ProductViewModel
+            {
+                Name = p.Name,
+                Price = p.Price,
+                Count = p.Count,
+                InventoryValue = p.Price * p.Count
+            })
+            .ToListAsync();
+
+        return View(productViewModels);
     }
 
     // GET: Products
