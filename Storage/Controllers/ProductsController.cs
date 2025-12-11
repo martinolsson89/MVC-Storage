@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Storage.Data;
 using Storage.Models;
+using Storage.Models.ViewModels;
 
 namespace Storage.Controllers;
 
@@ -18,6 +21,91 @@ public class ProductsController : Controller
     public ProductsController(StorageContext context)
     {
         _context = context;
+    }
+
+    // GET: Products/ProductSummary
+    public async Task<IActionResult> ProductSummary()
+    {
+        // GroupBy i databasen → en rad per kategori
+        var categoryData = await _context.Product
+            .GroupBy(p => p.Category)
+            .Select(g => new CategorySummaryViewModel
+            {
+                Category = g.Key,
+                ProductCount = g.Sum(p => p.Count),
+                InventoryValue = g.Sum(p => p.Price * p.Count)
+            })
+            .ToListAsync();
+
+        var viewModel = new ProductSummaryViewModel
+        {
+            Categories = categoryData,
+            TotalProductCount = categoryData.Sum(c => c.ProductCount),
+            TotalInventoryValue = categoryData.Sum(c => c.InventoryValue)
+        };
+
+        return View(viewModel);
+    }
+
+    // GET: Products/Filter
+
+    public async Task<IActionResult> ProductsFilter(string? searchString, string? selectedCategory)
+    {
+        var productsQuery = _context.Product.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            productsQuery = 
+                productsQuery.Where(p => p.Name.Contains(searchString));
+        }
+
+        if (!string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            productsQuery = 
+                productsQuery.Where(x => x.Category == selectedCategory);
+
+        }
+
+        var products = await productsQuery.ToListAsync();
+
+        var categories = await _context.Product
+            .Select(p => p.Category)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToListAsync();
+
+        var viewModel = new ProductsFilterViewModel
+        {
+            SearchString = searchString,
+            SelectedCategory = selectedCategory,
+            Products = products,
+            Categories = categories
+                .Select(c => new SelectListItem
+                {
+                    Value = c,
+                    Text = c
+                })
+        };
+
+        return View(viewModel);
+    }
+
+
+    // GET: ProductByCategory
+
+    public async Task<IActionResult> ProductsByCategory(string category)
+    {
+        var products = _context.Product.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            products = products.Where(x => x.Category == category);
+
+        }
+
+        var filteredProducts = await products.ToListAsync();
+
+        return View("Index", filteredProducts);
     }
 
     // GET: Products/Inventory
@@ -37,7 +125,7 @@ public class ProductsController : Controller
     }
 
     // GET: Products
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? searchString, string? selectedCategory)
     {
         return View(await _context.Product.ToListAsync());
     }

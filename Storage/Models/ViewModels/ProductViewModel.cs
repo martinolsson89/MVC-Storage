@@ -1,4 +1,4 @@
-﻿namespace Storage.Models;
+﻿namespace Storage.Models.ViewModels;
 
 public class ProductViewModel
 {

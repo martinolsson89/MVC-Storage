@@ -1,0 +1,44 @@
+﻿@model Storage.Models.ViewModels.ProductSummaryViewModel
+
+@{
+    ViewData["Title"] = "ProductSummary";
+}
+
+<h1>Products Summary</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Number of total products</th>
+            <th>Total value of all products</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@Model.TotalProductCount</td>
+            <td>@Model.TotalInventoryValue kr</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Total value and count by category</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Number of products</th>
+            <th>Total value</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cat in Model.Categories)
+        {
+            <tr>
+                <td>@cat.Category</td>
+                <td>@cat.ProductCount</td>
+                <td>@cat.InventoryValue kr</td>
+            </tr>
+        }
+    </tbody>
+</table>

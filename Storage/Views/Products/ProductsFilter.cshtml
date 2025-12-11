@@ -1,0 +1,88 @@
+﻿@model Storage.Models.ViewModels.ProductsFilterViewModel
+
+
+@{
+    ViewData["Title"] = "ProductsFilter";
+}
+
+<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <a class="btn btn-success" asp-action="Create">Create New</a>
+
+    <form asp-action="ProductsFilter" method="get" class="d-flex">
+
+        <input asp-for="SearchString"
+               class="form-control me-2"
+               placeholder="Sök på produktnamn" />
+
+        <select asp-for="SelectedCategory"
+                asp-items="Model.Categories"
+                class="form-select me-2">
+            <option value="">Alla kategorier</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">Filtrera</button>
+    </form>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                Orderdate
+            </th>
+            <th>
+                Category
+            </th>
+            <th>
+                Shelf
+            </th>
+            <th>
+                Count
+            </th>
+            <th>
+                Description
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Products)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Orderdate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Shelf)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Count)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
